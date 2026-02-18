@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { useKeyboard } from './Controls'
 import { gameState } from './gameState'
 import { useGameStore, CHARACTERS } from '../../store'
+import { resolveCollisions } from './collisions'
 
 const SPEED = 12
 const GRAVITY = -25
@@ -166,9 +167,14 @@ export function Player() {
         groupRef.current.position.y += gameState.velocityY * dt
         if (groupRef.current.position.y <= 0) { groupRef.current.position.y = 0; gameState.velocityY = 0; gameState.onGround = true }
 
-        // === Clamp ===
+        // === Clamp to map ===
         groupRef.current.position.x = Math.max(-46, Math.min(46, groupRef.current.position.x))
         groupRef.current.position.z = Math.max(-46, Math.min(46, groupRef.current.position.z))
+
+        // === Collision detection ===
+        const resolved = resolveCollisions(groupRef.current.position.x, groupRef.current.position.z)
+        groupRef.current.position.x = resolved.x
+        groupRef.current.position.z = resolved.z
 
         gameState.playerPosition.copy(groupRef.current.position)
         gameState.isMoving = isMoving
