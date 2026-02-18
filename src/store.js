@@ -1,9 +1,42 @@
 import { create } from 'zustand'
 
 export const CHARACTERS = {
-    ailani: { name: 'Ailani', emoji: '👧🏽', threeColor: 0x8e44ad, hair: 0x2c1810, desc: '7 años · Aventurera' },
-    aaylyn: { name: 'Aaylyn', emoji: '👧🏾', threeColor: 0x7b1fa2, hair: 0x1a1005, desc: 'Hermana · Valiente' },
-    carolina: { name: 'Carolina', emoji: '👩🏽', threeColor: 0xe91e63, hair: 0x2c1810, desc: 'Mamá · Cariñosa' },
+    ailani: {
+        name: 'Ailani', emoji: '👧🏽', desc: '7 años · Aventurera',
+        skin: 0xc68642,       // medium tan
+        hair: 0x2c1810,       // dark brown
+        hairStyle: 'ponytails', // two ponytails
+        dress: 0x8e44ad,      // purple dress
+        dressAccent: 0xc084fc, // lilac accent
+        shoes: 0xe91e63,      // pink shoes
+        accessory: 'bow',     // hair bow
+        accColor: 0xff69b4,   // pink bow
+        blush: 0xe8a0a0,
+    },
+    aaylyn: {
+        name: 'Aaylyn', emoji: '👧🏾', desc: 'Hermana · Valiente',
+        skin: 0x8d5524,       // darker tan
+        hair: 0x1a1005,       // very dark brown
+        hairStyle: 'braids',  // braided
+        dress: 0x7b1fa2,      // violet dress
+        dressAccent: 0xb388ff, // light violet accent
+        shoes: 0xfdd835,      // yellow shoes
+        accessory: 'headband', // headband
+        accColor: 0xfdd835,   // yellow headband
+        blush: 0xc07070,
+    },
+    carolina: {
+        name: 'Carolina', emoji: '👩🏽', desc: 'Mamá · Cariñosa',
+        skin: 0xc68642,       // medium tan
+        hair: 0x2c1810,       // dark brown
+        hairStyle: 'long',    // long flowing hair
+        dress: 0xe91e63,      // pink dress
+        dressAccent: 0xff80ab, // light pink accent
+        shoes: 0x8e44ad,      // purple shoes
+        accessory: 'earrings',// earrings
+        accColor: 0xffd700,   // gold earrings
+        blush: 0xe8a0a0,
+    },
 }
 
 export const useGameStore = create((set, get) => ({
