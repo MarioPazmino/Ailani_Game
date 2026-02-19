@@ -5,58 +5,63 @@ import { gameState } from './gameState'
 
 export function CameraRig() {
     const { camera, gl } = useThree()
-    const mouseRef = useRef({ down: false, x: 0, y: 0 })
     const camTarget = useRef(new THREE.Vector3())
     const camPos = useRef(new THREE.Vector3())
 
     useEffect(() => {
         const canvas = gl.domElement
 
-        const onMouseDown = (e) => {
-            mouseRef.current = { down: true, x: e.clientX, y: e.clientY }
-        }
-        const onMouseUp = () => { mouseRef.current.down = false }
-        const onMouseMove = (e) => {
-            if (!mouseRef.current.down) return
-            const dx = e.clientX - mouseRef.current.x
-            const dy = e.clientY - mouseRef.current.y
-            mouseRef.current.x = e.clientX
-            mouseRef.current.y = e.clientY
-            gameState.cameraTheta -= dx * 0.005
-            gameState.cameraPhi = Math.max(0.15, Math.min(1.2, gameState.cameraPhi - dy * 0.005))
-        }
-
-        // Touch support
-        const onTouchStart = (e) => {
-            if (e.touches.length === 1) {
-                mouseRef.current = { down: true, x: e.touches[0].clientX, y: e.touches[0].clientY }
+        // Click to lock pointer — gives unlimited mouse movement
+        const onClick = () => {
+            if (!document.pointerLockElement) {
+                canvas.requestPointerLock()
             }
         }
-        const onTouchEnd = () => { mouseRef.current.down = false }
+
+        // Mouse movement (only works when pointer is locked)
+        const onMouseMove = (e) => {
+            if (document.pointerLockElement !== canvas) return
+            gameState.cameraTheta -= e.movementX * 0.003
+            gameState.cameraPhi = Math.max(0.15, Math.min(1.2, gameState.cameraPhi - e.movementY * 0.003))
+        }
+
+        // ESC releases pointer lock automatically (browser default)
+
+        // Touch support (drag-based for mobile)
+        const touchRef = { down: false, x: 0, y: 0 }
+        const onTouchStart = (e) => {
+            if (e.touches.length === 1) {
+                touchRef.down = true
+                touchRef.x = e.touches[0].clientX
+                touchRef.y = e.touches[0].clientY
+            }
+        }
+        const onTouchEnd = () => { touchRef.down = false }
         const onTouchMove = (e) => {
-            if (!mouseRef.current.down || e.touches.length !== 1) return
-            const dx = e.touches[0].clientX - mouseRef.current.x
-            const dy = e.touches[0].clientY - mouseRef.current.y
-            mouseRef.current.x = e.touches[0].clientX
-            mouseRef.current.y = e.touches[0].clientY
+            if (!touchRef.down || e.touches.length !== 1) return
+            const dx = e.touches[0].clientX - touchRef.x
+            const dy = e.touches[0].clientY - touchRef.y
+            touchRef.x = e.touches[0].clientX
+            touchRef.y = e.touches[0].clientY
             gameState.cameraTheta -= dx * 0.005
             gameState.cameraPhi = Math.max(0.15, Math.min(1.2, gameState.cameraPhi - dy * 0.005))
         }
 
-        canvas.addEventListener('mousedown', onMouseDown)
-        window.addEventListener('mouseup', onMouseUp)
-        window.addEventListener('mousemove', onMouseMove)
+        canvas.addEventListener('click', onClick)
+        document.addEventListener('mousemove', onMouseMove)
         canvas.addEventListener('touchstart', onTouchStart, { passive: true })
         window.addEventListener('touchend', onTouchEnd)
         window.addEventListener('touchmove', onTouchMove, { passive: true })
 
         return () => {
-            canvas.removeEventListener('mousedown', onMouseDown)
-            window.removeEventListener('mouseup', onMouseUp)
-            window.removeEventListener('mousemove', onMouseMove)
+            canvas.removeEventListener('click', onClick)
+            document.removeEventListener('mousemove', onMouseMove)
             canvas.removeEventListener('touchstart', onTouchStart)
             window.removeEventListener('touchend', onTouchEnd)
             window.removeEventListener('touchmove', onTouchMove)
+            if (document.pointerLockElement === canvas) {
+                document.exitPointerLock()
+            }
         }
     }, [gl])
 

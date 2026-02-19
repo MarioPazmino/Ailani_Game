@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { gameState } from './gameState'
+import { FarmhouseInterior } from './FarmhouseInterior'
+import { BarnInterior } from './BarnInterior'
 
 /* ====== SUBCOMPONENTS ====== */
 
@@ -156,111 +158,162 @@ function Fence() {
 }
 
 function Farmhouse() {
+    const wallsRef = useRef()
+    const opacity = useRef(1)
+
+    useFrame(() => {
+        // Check distance from player to farmhouse door (world pos: [-15, 0, -12])
+        const dx = gameState.playerPosition.x - (-15)
+        const dz = gameState.playerPosition.z - (-12)
+        const dist = Math.sqrt(dx * dx + dz * dz)
+        const targetOpacity = dist < 6 ? 0.15 : 1
+        opacity.current += (targetOpacity - opacity.current) * 0.08
+        if (wallsRef.current) {
+            wallsRef.current.traverse(child => {
+                if (child.isMesh && child.material) {
+                    child.material.transparent = true
+                    child.material.opacity = opacity.current
+                }
+            })
+        }
+    })
+
     return (
         <group position={[-15, 0, -15]}>
-            {/* Foundation */}
-            <mesh position={[0, 0.2, 0]} castShadow>
-                <boxGeometry args={[8.5, 0.4, 6.5]} />
-                <meshLambertMaterial color={0x9e9e9e} />
-            </mesh>
-            {/* Walls */}
-            <mesh position={[0, 2.5, 0]} castShadow receiveShadow>
-                <boxGeometry args={[8, 5, 6]} />
-                <meshLambertMaterial color={0xfaebd7} />
-            </mesh>
-            {/* Wall trim */}
-            <mesh position={[0, 4.95, 0]} castShadow>
-                <boxGeometry args={[8.2, 0.15, 6.2]} />
-                <meshLambertMaterial color={0xdec4a0} />
-            </mesh>
-            {/* Roof */}
-            <mesh position={[0, 6.5, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
-                <coneGeometry args={[6, 3, 4]} />
-                <meshLambertMaterial color={0xc0392b} />
-            </mesh>
-            {/* Door */}
-            <mesh position={[0, 1.5, 3.05]}>
-                <boxGeometry args={[1.5, 3, 0.1]} />
-                <meshLambertMaterial color={0x6d4c2e} />
-            </mesh>
-            {/* Door handle */}
-            <mesh position={[0.5, 1.6, 3.12]}>
-                <sphereGeometry args={[0.08, 6, 6]} />
-                <meshPhongMaterial color={0xffd700} />
-            </mesh>
-            {/* Porch */}
-            <mesh position={[0, 0.15, 4.5]}>
-                <boxGeometry args={[5, 0.15, 2.5]} />
-                <meshLambertMaterial color={0xa0845c} />
-            </mesh>
-            {/* Windows */}
-            {[-2.5, 2.5].map(x => (
-                <group key={x} position={[x, 3.2, 3.05]}>
-                    <mesh><boxGeometry args={[1.2, 1.2, 0.1]} /><meshLambertMaterial color={0x85d4f7} /></mesh>
-                    {/* Window frame */}
-                    <mesh position={[0, 0, 0.02]}><boxGeometry args={[0.08, 1.2, 0.02]} /><meshLambertMaterial color={0xfaebd7} /></mesh>
-                    <mesh position={[0, 0, 0.02]}><boxGeometry args={[1.2, 0.08, 0.02]} /><meshLambertMaterial color={0xfaebd7} /></mesh>
-                </group>
-            ))}
-            {/* Chimney */}
-            <mesh position={[3, 7, -1]} castShadow>
-                <boxGeometry args={[1, 2.5, 1]} />
-                <meshLambertMaterial color={0x7f4030} />
-            </mesh>
-            {/* Flower box under windows */}
-            {[-2.5, 2.5].map(x => (
-                <group key={`fb${x}`} position={[x, 2.4, 3.2]}>
-                    <mesh><boxGeometry args={[1.2, 0.25, 0.3]} /><meshLambertMaterial color={0x8d6e3c} /></mesh>
-                    {[-0.3, 0, 0.3].map((ox, i) => (
-                        <mesh key={i} position={[ox, 0.25, 0]}><sphereGeometry args={[0.12, 6, 6]} /><meshLambertMaterial color={[0xff6b6b, 0xffd93d, 0xff85c8][i]} /></mesh>
-                    ))}
-                </group>
-            ))}
+            {/* Interior (always rendered, visible when walls transparent) */}
+            <FarmhouseInterior />
+
+            {/* Exterior shell */}
+            <group ref={wallsRef}>
+                {/* Foundation */}
+                <mesh position={[0, 0.2, 0]} castShadow>
+                    <boxGeometry args={[8.5, 0.4, 6.5]} />
+                    <meshLambertMaterial color={0x9e9e9e} />
+                </mesh>
+                {/* Walls */}
+                <mesh position={[0, 2.5, 0]} castShadow receiveShadow>
+                    <boxGeometry args={[8, 5, 6]} />
+                    <meshLambertMaterial color={0xfaebd7} />
+                </mesh>
+                {/* Wall trim */}
+                <mesh position={[0, 4.95, 0]} castShadow>
+                    <boxGeometry args={[8.2, 0.15, 6.2]} />
+                    <meshLambertMaterial color={0xdec4a0} />
+                </mesh>
+                {/* Roof */}
+                <mesh position={[0, 6.5, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+                    <coneGeometry args={[6, 3, 4]} />
+                    <meshLambertMaterial color={0xc0392b} />
+                </mesh>
+                {/* Door */}
+                <mesh position={[0, 1.5, 3.05]}>
+                    <boxGeometry args={[1.5, 3, 0.1]} />
+                    <meshLambertMaterial color={0x6d4c2e} />
+                </mesh>
+                {/* Door handle */}
+                <mesh position={[0.5, 1.6, 3.12]}>
+                    <sphereGeometry args={[0.08, 6, 6]} />
+                    <meshPhongMaterial color={0xffd700} />
+                </mesh>
+                {/* Porch */}
+                <mesh position={[0, 0.15, 4.5]}>
+                    <boxGeometry args={[5, 0.15, 2.5]} />
+                    <meshLambertMaterial color={0xa0845c} />
+                </mesh>
+                {/* Windows */}
+                {[-2.5, 2.5].map(x => (
+                    <group key={x} position={[x, 3.2, 3.05]}>
+                        <mesh><boxGeometry args={[1.2, 1.2, 0.1]} /><meshLambertMaterial color={0x85d4f7} /></mesh>
+                        <mesh position={[0, 0, 0.02]}><boxGeometry args={[0.08, 1.2, 0.02]} /><meshLambertMaterial color={0xfaebd7} /></mesh>
+                        <mesh position={[0, 0, 0.02]}><boxGeometry args={[1.2, 0.08, 0.02]} /><meshLambertMaterial color={0xfaebd7} /></mesh>
+                    </group>
+                ))}
+                {/* Chimney */}
+                <mesh position={[3, 7, -1]} castShadow>
+                    <boxGeometry args={[1, 2.5, 1]} />
+                    <meshLambertMaterial color={0x7f4030} />
+                </mesh>
+                {/* Flower boxes */}
+                {[-2.5, 2.5].map(x => (
+                    <group key={`fb${x}`} position={[x, 2.4, 3.2]}>
+                        <mesh><boxGeometry args={[1.2, 0.25, 0.3]} /><meshLambertMaterial color={0x8d6e3c} /></mesh>
+                        {[-0.3, 0, 0.3].map((ox, i) => (
+                            <mesh key={i} position={[ox, 0.25, 0]}><sphereGeometry args={[0.12, 6, 6]} /><meshLambertMaterial color={[0xff6b6b, 0xffd93d, 0xff85c8][i]} /></mesh>
+                        ))}
+                    </group>
+                ))}
+            </group>
         </group>
     )
 }
 
 function Barn() {
+    const wallsRef = useRef()
+    const opacity = useRef(1)
+
+    useFrame(() => {
+        // Check distance from player to barn door (world pos: [18, 0, -8])
+        const dx = gameState.playerPosition.x - 18
+        const dz = gameState.playerPosition.z - (-8)
+        const dist = Math.sqrt(dx * dx + dz * dz)
+        const targetOpacity = dist < 7 ? 0.15 : 1
+        opacity.current += (targetOpacity - opacity.current) * 0.08
+        if (wallsRef.current) {
+            wallsRef.current.traverse(child => {
+                if (child.isMesh && child.material) {
+                    child.material.transparent = true
+                    child.material.opacity = opacity.current
+                }
+            })
+        }
+    })
+
     return (
         <group position={[18, 0, -12]}>
-            <mesh position={[0, 3.5, 0]} castShadow receiveShadow>
-                <boxGeometry args={[10, 7, 8]} />
-                <meshLambertMaterial color={0xb71c1c} />
-            </mesh>
-            {/* White trim */}
-            <mesh position={[0, 7, 0]}>
-                <boxGeometry args={[10.2, 0.15, 8.2]} />
-                <meshLambertMaterial color={0xfafafa} />
-            </mesh>
-            <mesh position={[0, 0.08, 0]}>
-                <boxGeometry args={[10.2, 0.15, 8.2]} />
-                <meshLambertMaterial color={0xfafafa} />
-            </mesh>
-            <mesh position={[0, 8.5, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
-                <coneGeometry args={[7.5, 3, 4]} />
-                <meshLambertMaterial color={0x8b0000} />
-            </mesh>
-            {/* Big door */}
-            <mesh position={[0, 2.5, 4.05]}>
-                <boxGeometry args={[4, 5, 0.1]} />
-                <meshLambertMaterial color={0x5d1612} />
-            </mesh>
-            {/* X bracing */}
-            <mesh position={[0, 2.5, 4.1]} rotation={[0, 0, 0.5]}>
-                <boxGeometry args={[0.15, 5.5, 0.05]} />
-                <meshLambertMaterial color={0xfafafa} />
-            </mesh>
-            <mesh position={[0, 2.5, 4.1]} rotation={[0, 0, -0.5]}>
-                <boxGeometry args={[0.15, 5.5, 0.05]} />
-                <meshLambertMaterial color={0xfafafa} />
-            </mesh>
-            {/* Hay bales near barn */}
-            {[[6, 0.5, 2], [7, 0.5, 0], [6.5, 1.3, 1]].map(([x, y, z], i) => (
-                <mesh key={i} position={[x, y, z]} rotation={[0, i * 0.5, 0]} castShadow>
-                    <cylinderGeometry args={[0.6, 0.6, 1.2, 8]} />
-                    <meshLambertMaterial color={0xd4a057} />
+            {/* Interior */}
+            <BarnInterior />
+
+            {/* Exterior shell */}
+            <group ref={wallsRef}>
+                <mesh position={[0, 3.5, 0]} castShadow receiveShadow>
+                    <boxGeometry args={[10, 7, 8]} />
+                    <meshLambertMaterial color={0xb71c1c} />
                 </mesh>
-            ))}
+                {/* White trim */}
+                <mesh position={[0, 7, 0]}>
+                    <boxGeometry args={[10.2, 0.15, 8.2]} />
+                    <meshLambertMaterial color={0xfafafa} />
+                </mesh>
+                <mesh position={[0, 0.08, 0]}>
+                    <boxGeometry args={[10.2, 0.15, 8.2]} />
+                    <meshLambertMaterial color={0xfafafa} />
+                </mesh>
+                <mesh position={[0, 8.5, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+                    <coneGeometry args={[7.5, 3, 4]} />
+                    <meshLambertMaterial color={0x8b0000} />
+                </mesh>
+                {/* Big door */}
+                <mesh position={[0, 2.5, 4.05]}>
+                    <boxGeometry args={[4, 5, 0.1]} />
+                    <meshLambertMaterial color={0x5d1612} />
+                </mesh>
+                {/* X bracing */}
+                <mesh position={[0, 2.5, 4.1]} rotation={[0, 0, 0.5]}>
+                    <boxGeometry args={[0.15, 5.5, 0.05]} />
+                    <meshLambertMaterial color={0xfafafa} />
+                </mesh>
+                <mesh position={[0, 2.5, 4.1]} rotation={[0, 0, -0.5]}>
+                    <boxGeometry args={[0.15, 5.5, 0.05]} />
+                    <meshLambertMaterial color={0xfafafa} />
+                </mesh>
+                {/* Hay bales near barn */}
+                {[[6, 0.5, 2], [7, 0.5, 0], [6.5, 1.3, 1]].map(([x, y, z], i) => (
+                    <mesh key={i} position={[x, y, z]} rotation={[0, i * 0.5, 0]} castShadow>
+                        <cylinderGeometry args={[0.6, 0.6, 1.2, 8]} />
+                        <meshLambertMaterial color={0xd4a057} />
+                    </mesh>
+                ))}
+            </group>
         </group>
     )
 }
