@@ -13,8 +13,8 @@ export const CHARACTERS = {
         accColor: 0xff69b4,   // pink bow
         blush: 0xe8a0a0,
     },
-    aaylyn: {
-        name: 'Aaylyn', emoji: '👧🏾', desc: 'Hermana · Valiente',
+    aylin: {
+        name: 'Aylin', emoji: '👧🏾', desc: 'Hermana · Valiente',
         skin: 0x8d5524,       // darker tan
         hair: 0x1a1005,       // very dark brown
         hairStyle: 'braids',  // braided
@@ -45,6 +45,7 @@ export const useGameStore = create((set, get) => ({
 
     screen: 'start',
     startGame: () => set({ screen: 'game' }),
+    goBack: () => set({ screen: 'start', stars: 0, points: 0 }),
 
     stars: 0,
     points: 0,

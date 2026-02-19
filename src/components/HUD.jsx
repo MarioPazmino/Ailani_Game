@@ -9,6 +9,7 @@ export default function HUD() {
     const tooltip = useGameStore((s) => s.tooltip)
     const [showHint, setShowHint] = useState(true)
 
+    const goBack = useGameStore((s) => s.goBack)
     const ch = CHARACTERS[character]
 
     useEffect(() => {
@@ -18,9 +19,14 @@ export default function HUD() {
 
     return (
         <div className="hud">
-            <div className="hud-name">
-                <span className="hud-name-emoji">{ch.emoji}</span>
-                {ch.name}
+            <div className="hud-top-left">
+                <button className="hud-back-btn" onClick={goBack} title="Cambiar personaje">
+                    ←
+                </button>
+                <div className="hud-name">
+                    <span className="hud-name-emoji">{ch.emoji}</span>
+                    {ch.name}
+                </div>
             </div>
 
             <div className="hud-score">

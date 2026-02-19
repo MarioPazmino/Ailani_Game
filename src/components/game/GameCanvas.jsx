@@ -7,6 +7,7 @@ import { Sky } from './Sky'
 import { Animals } from './Animals'
 import { Player } from './Player'
 import { Stars } from './Stars'
+import { SkyFormations } from './SkyFormations'
 import { CameraRig } from './CameraRig'
 
 export default function GameCanvas() {
@@ -43,6 +44,7 @@ export default function GameCanvas() {
             <Animals />
             <Player />
             <Stars />
+            <SkyFormations />
             <CameraRig />
         </Canvas>
     )
