@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { gameState } from '../gameState'
+import { playHorseSound } from '../animalSounds'
 
 export default function Horse({ cx, cz, radius }) {
     const ref = useRef()
@@ -12,6 +13,7 @@ export default function Horse({ cx, cz, radius }) {
         state: 'idle', timer: 1 + Math.random() * 2,
         targetX: cx, targetZ: cz, facing: 0,
         headDip: 0, speed: 0, legPhase: 0,
+        soundCooldown: 2,
     })
 
     useFrame((state, delta) => {
@@ -110,6 +112,20 @@ export default function Horse({ cx, cz, radius }) {
             tailRef.current.rotation.x = Math.sin(t * 2) * 0.2
             tailRef.current.rotation.z = Math.sin(t * 3) * 0.15
         }
+
+        // Proximity sound
+        a.soundCooldown -= dt
+        if (a.soundCooldown <= 0) {
+            const pp = gameState.playerPosition
+            const sdx = ref.current.position.x - pp.x
+            const sdz = ref.current.position.z - pp.z
+            if (Math.sqrt(sdx * sdx + sdz * sdz) < 6) {
+                playHorseSound()
+                a.soundCooldown = 7 + Math.random() * 3
+            } else {
+                a.soundCooldown = 1
+            }
+        }
     })
 
     const legPositions = [[-0.8, 0.4, -0.4], [-0.8, 0.4, 0.4], [0.8, 0.4, -0.4], [0.8, 0.4, 0.4]]
@@ -167,8 +183,6 @@ export default function Horse({ cx, cz, radius }) {
                 <mesh position={[0, -0.6, 0]}><cylinderGeometry args={[0.05, 0.02, 0.3, 6]} /><meshLambertMaterial color={0x3e2723} /></mesh>
             </group>
 
-            <Html position={[0, 3.5, 0]} center distanceFactor={15}
-                style={{ userSelect: 'none', pointerEvents: 'none', fontSize: '2rem' }} zIndexRange={[0, 0]}>🐴</Html>
         </group>
     )
 }

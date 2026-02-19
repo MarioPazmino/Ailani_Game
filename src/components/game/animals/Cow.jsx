@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { gameState } from '../gameState'
+import { playCowSound } from '../animalSounds'
 
 /*
   COW BEHAVIORS:
@@ -22,6 +23,7 @@ export default function Cow({ cx, cz, radius }) {
         facing: 0,
         headDip: 0,
         chewPhase: 0,
+        soundCooldown: 2,
     })
 
     useFrame((state, delta) => {
@@ -99,6 +101,20 @@ export default function Cow({ cx, cz, radius }) {
         // Tail swish
         if (tailRef.current) {
             tailRef.current.rotation.z = 0.6 + Math.sin(t * 3) * 0.3
+        }
+
+        // Proximity sound
+        a.soundCooldown -= dt
+        if (a.soundCooldown <= 0) {
+            const pp = gameState.playerPosition
+            const sdx = ref.current.position.x - pp.x
+            const sdz = ref.current.position.z - pp.z
+            if (Math.sqrt(sdx * sdx + sdz * sdz) < 5) {
+                playCowSound()
+                a.soundCooldown = 6 + Math.random() * 3
+            } else {
+                a.soundCooldown = 1
+            }
         }
     })
 
@@ -214,12 +230,6 @@ export default function Cow({ cx, cz, radius }) {
                 </mesh>
             </group>
 
-            {/* Label */}
-            <Html position={[0, 3.2, 0]} center distanceFactor={15}
-                style={{ userSelect: 'none', pointerEvents: 'none', fontSize: '2rem' }}
-                zIndexRange={[0, 0]}>
-                🐄
-            </Html>
         </group>
     )
 }

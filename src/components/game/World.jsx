@@ -37,7 +37,7 @@ function Ground() {
 function GrassClumps() {
     const clumps = useMemo(() => {
         const arr = []
-        for (let i = 0; i < 200; i++) {
+        for (let i = 0; i < 80; i++) {
             const seed = Math.sin(i * 17.31) * 0.5 + 0.5
             const seed2 = Math.cos(i * 11.47) * 0.5 + 0.5
             const x = (seed - 0.5) * 90
@@ -159,22 +159,31 @@ function Fence() {
 
 function Farmhouse() {
     const wallsRef = useRef()
+    const matsRef = useRef(null)
     const opacity = useRef(1)
 
     useFrame(() => {
-        // Check distance from player to farmhouse door (world pos: [-15, 0, -12])
         const dx = gameState.playerPosition.x - (-15)
         const dz = gameState.playerPosition.z - (-12)
         const dist = Math.sqrt(dx * dx + dz * dz)
         const targetOpacity = dist < 6 ? 0.15 : 1
-        opacity.current += (targetOpacity - opacity.current) * 0.08
-        if (wallsRef.current) {
+        const diff = targetOpacity - opacity.current
+        if (Math.abs(diff) < 0.005) return
+        opacity.current += diff * 0.08
+        // Cache materials on first run
+        if (!matsRef.current && wallsRef.current) {
+            matsRef.current = []
             wallsRef.current.traverse(child => {
                 if (child.isMesh && child.material) {
                     child.material.transparent = true
-                    child.material.opacity = opacity.current
+                    matsRef.current.push(child.material)
                 }
             })
+        }
+        if (matsRef.current) {
+            for (let i = 0; i < matsRef.current.length; i++) {
+                matsRef.current[i].opacity = opacity.current
+            }
         }
     })
 
@@ -249,22 +258,30 @@ function Farmhouse() {
 
 function Barn() {
     const wallsRef = useRef()
+    const matsRef = useRef(null)
     const opacity = useRef(1)
 
     useFrame(() => {
-        // Check distance from player to barn door (world pos: [18, 0, -8])
         const dx = gameState.playerPosition.x - 18
         const dz = gameState.playerPosition.z - (-8)
         const dist = Math.sqrt(dx * dx + dz * dz)
         const targetOpacity = dist < 7 ? 0.15 : 1
-        opacity.current += (targetOpacity - opacity.current) * 0.08
-        if (wallsRef.current) {
+        const diff = targetOpacity - opacity.current
+        if (Math.abs(diff) < 0.005) return
+        opacity.current += diff * 0.08
+        if (!matsRef.current && wallsRef.current) {
+            matsRef.current = []
             wallsRef.current.traverse(child => {
                 if (child.isMesh && child.material) {
                     child.material.transparent = true
-                    child.material.opacity = opacity.current
+                    matsRef.current.push(child.material)
                 }
             })
+        }
+        if (matsRef.current) {
+            for (let i = 0; i < matsRef.current.length; i++) {
+                matsRef.current[i].opacity = opacity.current
+            }
         }
     })
 

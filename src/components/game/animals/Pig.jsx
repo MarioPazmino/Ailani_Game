@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { gameState } from '../gameState'
+import { playPigSound } from '../animalSounds'
 
 /*
   PIG BEHAVIORS:
@@ -25,6 +26,7 @@ export default function Pig({ cx, cz, radius }) {
         snoutDip: 0,
         wallowPhase: 0,
         snortShake: 0,
+        soundCooldown: 2,
     })
 
     useFrame((state, delta) => {
@@ -138,6 +140,20 @@ export default function Pig({ cx, cz, radius }) {
         if (tailRef.current) {
             tailRef.current.rotation.y = Math.sin(t * 5) * 0.4
         }
+
+        // Proximity sound
+        a.soundCooldown -= dt
+        if (a.soundCooldown <= 0) {
+            const pp = gameState.playerPosition
+            const sdx = ref.current.position.x - pp.x
+            const sdz = ref.current.position.z - pp.z
+            if (Math.sqrt(sdx * sdx + sdz * sdz) < 5) {
+                playPigSound()
+                a.soundCooldown = 5 + Math.random() * 3
+            } else {
+                a.soundCooldown = 1
+            }
+        }
     })
 
     return (
@@ -229,12 +245,6 @@ export default function Pig({ cx, cz, radius }) {
                 </mesh>
             </group>
 
-            {/* Label */}
-            <Html position={[0, 2.5, 0]} center distanceFactor={15}
-                style={{ userSelect: 'none', pointerEvents: 'none', fontSize: '2rem' }}
-                zIndexRange={[0, 0]}>
-                🐷
-            </Html>
         </group>
     )
 }

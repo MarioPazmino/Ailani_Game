@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { gameState } from '../gameState'
+import { playSheepSound } from '../animalSounds'
 
 export default function Sheep({ cx, cz, radius }) {
     const ref = useRef()
@@ -9,6 +10,7 @@ export default function Sheep({ cx, cz, radius }) {
         state: 'graze', timer: 2 + Math.random() * 3,
         targetX: cx, targetZ: cz, facing: 0,
         headAngle: 0, headLook: 0,
+        soundCooldown: 3,
     })
 
     useFrame((state, delta) => {
@@ -74,6 +76,20 @@ export default function Sheep({ cx, cz, radius }) {
             headRef.current.position.y = 1.15 - a.headAngle * 0.4
             headRef.current.position.x = 0.85 + a.headAngle * 0.15
         }
+
+        // Proximity sound
+        a.soundCooldown -= dt
+        if (a.soundCooldown <= 0) {
+            const pp = gameState.playerPosition
+            const sdx = ref.current.position.x - pp.x
+            const sdz = ref.current.position.z - pp.z
+            if (Math.sqrt(sdx * sdx + sdz * sdz) < 5) {
+                playSheepSound()
+                a.soundCooldown = 6 + Math.random() * 3
+            } else {
+                a.soundCooldown = 1
+            }
+        }
     })
 
     return (
@@ -119,8 +135,6 @@ export default function Sheep({ cx, cz, radius }) {
             {/* Tail */}
             <mesh position={[-0.85, 1.1, 0]}><sphereGeometry args={[0.12, 6, 6]} /><meshLambertMaterial color={0xf5f5f5} /></mesh>
 
-            <Html position={[0, 2.6, 0]} center distanceFactor={15}
-                style={{ userSelect: 'none', pointerEvents: 'none', fontSize: '2rem' }} zIndexRange={[0, 0]}>🐑</Html>
         </group>
     )
 }

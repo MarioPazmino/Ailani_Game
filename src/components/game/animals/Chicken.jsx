@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { gameState } from '../gameState'
+import { playChickenSound } from '../animalSounds'
 
 /*
   CHICKEN BEHAVIORS:
@@ -26,6 +27,7 @@ export default function Chicken({ cx, cz, radius }) {
         wingFlap: 0,
         dashSpeed: 0,
         headTilt: 0,
+        soundCooldown: 1,
     })
 
     useFrame((state, delta) => {
@@ -153,6 +155,20 @@ export default function Chicken({ cx, cz, radius }) {
             lwingRef.current.rotation.z = 0.1 + flapAngle
             rwingRef.current.rotation.z = 0.1 - flapAngle
         }
+
+        // Proximity sound
+        a.soundCooldown -= dt
+        if (a.soundCooldown <= 0) {
+            const pp = gameState.playerPosition
+            const sdx = ref.current.position.x - pp.x
+            const sdz = ref.current.position.z - pp.z
+            if (Math.sqrt(sdx * sdx + sdz * sdz) < 4) {
+                playChickenSound()
+                a.soundCooldown = 5 + Math.random() * 3
+            } else {
+                a.soundCooldown = 1
+            }
+        }
     })
 
     return (
@@ -253,12 +269,6 @@ export default function Chicken({ cx, cz, radius }) {
                 <meshLambertMaterial color={0xff8f00} />
             </mesh>
 
-            {/* Label */}
-            <Html position={[0, 2.0, 0]} center distanceFactor={15}
-                style={{ userSelect: 'none', pointerEvents: 'none', fontSize: '2rem' }}
-                zIndexRange={[0, 0]}>
-                🐔
-            </Html>
         </group>
     )
 }
