@@ -163,26 +163,32 @@ function Farmhouse() {
     const opacity = useRef(1)
 
     useFrame(() => {
-        const dx = gameState.playerPosition.x - (-15)
-        const dz = gameState.playerPosition.z - (-12)
-        const dist = Math.sqrt(dx * dx + dz * dz)
-        const targetOpacity = dist < 6 ? 0.15 : 1
-        const diff = targetOpacity - opacity.current
-        if (Math.abs(diff) < 0.005) return
-        opacity.current += diff * 0.08
-        // Cache materials on first run
+        // Build material cache on first frame
         if (!matsRef.current && wallsRef.current) {
             matsRef.current = []
             wallsRef.current.traverse(child => {
                 if (child.isMesh && child.material) {
+                    child.material = child.material.clone()
                     child.material.transparent = true
+                    child.material.depthWrite = false
                     matsRef.current.push(child.material)
                 }
             })
         }
+
+        // Farmhouse world center: group is at [-15,0,-15]
+        const dx = gameState.playerPosition.x - (-15)
+        const dz = gameState.playerPosition.z - (-15)
+        const dist = Math.sqrt(dx * dx + dz * dz)
+        const targetOpacity = dist < 7 ? 0.15 : 1
+        const diff = targetOpacity - opacity.current
+        if (Math.abs(diff) < 0.004) return
+        opacity.current += diff * 0.1
+
         if (matsRef.current) {
             for (let i = 0; i < matsRef.current.length; i++) {
                 matsRef.current[i].opacity = opacity.current
+                matsRef.current[i].needsUpdate = true
             }
         }
     })
@@ -262,25 +268,32 @@ function Barn() {
     const opacity = useRef(1)
 
     useFrame(() => {
-        const dx = gameState.playerPosition.x - 18
-        const dz = gameState.playerPosition.z - (-8)
-        const dist = Math.sqrt(dx * dx + dz * dz)
-        const targetOpacity = dist < 7 ? 0.15 : 1
-        const diff = targetOpacity - opacity.current
-        if (Math.abs(diff) < 0.005) return
-        opacity.current += diff * 0.08
+        // Build material cache on first frame
         if (!matsRef.current && wallsRef.current) {
             matsRef.current = []
             wallsRef.current.traverse(child => {
                 if (child.isMesh && child.material) {
+                    child.material = child.material.clone()
                     child.material.transparent = true
+                    child.material.depthWrite = false
                     matsRef.current.push(child.material)
                 }
             })
         }
+
+        // Barn world center: group is at [18,0,-12]
+        const dx = gameState.playerPosition.x - 18
+        const dz = gameState.playerPosition.z - (-12)
+        const dist = Math.sqrt(dx * dx + dz * dz)
+        const targetOpacity = dist < 8 ? 0.15 : 1
+        const diff = targetOpacity - opacity.current
+        if (Math.abs(diff) < 0.004) return
+        opacity.current += diff * 0.1
+
         if (matsRef.current) {
             for (let i = 0; i < matsRef.current.length; i++) {
                 matsRef.current[i].opacity = opacity.current
+                matsRef.current[i].needsUpdate = true
             }
         }
     })

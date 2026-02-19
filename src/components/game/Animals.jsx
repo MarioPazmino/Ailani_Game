@@ -3,6 +3,7 @@ import Chicken from './animals/Chicken'
 import Pig from './animals/Pig'
 import Sheep from './animals/Sheep'
 import Horse from './animals/Horse'
+import Rabbit from './animals/Rabbit'
 
 export function Animals() {
     return (
@@ -12,6 +13,8 @@ export function Animals() {
             <Pig cx={25} cz={5} radius={4} />
             <Sheep cx={-20} cz={-5} radius={4} />
             <Horse cx={5} cz={-20} radius={6} />
+            {/* Camilo corre por toda la granja */}
+            <Rabbit cx={0} cz={0} radius={35} />
         </group>
     )
 }
