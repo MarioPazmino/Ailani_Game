@@ -5,6 +5,7 @@ import { FarmhouseInterior } from './FarmhouseInterior'
 import { BarnInterior } from './BarnInterior'
 import { Lanterns } from './Lanterns'
 import { MathPortal } from '../mathWorld/MathPortal'
+import { WordPortal } from '../wordWorld/WordPortal'
 
 /* ====== SUBCOMPONENTS ====== */
 
@@ -504,6 +505,7 @@ export function World() {
             <Rocks />
             <Lanterns />
             <MathPortal />
+            <WordPortal />
         </group>
     )
 }

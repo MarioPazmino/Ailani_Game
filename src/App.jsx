@@ -3,6 +3,7 @@ import StartScreen from './components/StartScreen'
 import GameCanvas from './components/game/GameCanvas'
 import HUD from './components/HUD'
 import MathWorld from './components/mathWorld/MathWorld'
+import WordWorld from './components/wordWorld/WordWorld'
 
 export default function App() {
     const screen = useGameStore((s) => s.screen)
@@ -17,6 +18,7 @@ export default function App() {
                 </>
             )}
             {screen === 'mathWorld' && <MathWorld />}
+            {screen === 'wordWorld' && <WordWorld />}
         </>
     )
 }
