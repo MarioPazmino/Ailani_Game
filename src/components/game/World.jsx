@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { gameState } from './gameState'
 import { FarmhouseInterior } from './FarmhouseInterior'
 import { BarnInterior } from './BarnInterior'
+import { Lanterns } from './Lanterns'
 
 /* ====== SUBCOMPONENTS ====== */
 
@@ -12,12 +13,12 @@ function Ground() {
             {/* Base dirt */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
                 <planeGeometry args={[100, 100]} />
-                <meshLambertMaterial color={0x5d4037} />
+                <meshPhongMaterial color={0x5d4037} shininess={4} specular={0x2a1a0a} />
             </mesh>
             {/* Main grass layer */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
                 <planeGeometry args={[100, 100]} />
-                <meshLambertMaterial color={0x4caf50} />
+                <meshPhongMaterial color={0x4caf50} shininess={8} specular={0x1a3a1a} />
             </mesh>
             {/* Grass variation patches — darker/lighter areas */}
             {[[-20, 15, 18, 14, 0x388e3c], [15, -25, 22, 16, 0x66bb6a], [-30, -20, 15, 12, 0x2e7d32],
@@ -26,7 +27,7 @@ function Ground() {
             ].map(([x, z, w, h, c], i) => (
                 <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.015, z]} receiveShadow>
                     <planeGeometry args={[w, h]} />
-                    <meshLambertMaterial color={c} />
+                    <meshPhongMaterial color={c} shininess={6} />
                 </mesh>
             ))}
         </group>
@@ -81,21 +82,21 @@ function DirtPath() {
             {/* Main vertical path */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]} receiveShadow>
                 <planeGeometry args={[4, 60]} />
-                <meshLambertMaterial color={0xb87333} />
+                <meshPhongMaterial color={0xb87333} shininess={12} specular={0x3a2010} />
             </mesh>
             {/* Path edges (slightly darker) */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-2.2, 0.022, 0]} receiveShadow>
                 <planeGeometry args={[0.5, 60]} />
-                <meshLambertMaterial color={0x9e6930} />
+                <meshPhongMaterial color={0x9e6930} shininess={8} />
             </mesh>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[2.2, 0.022, 0]} receiveShadow>
                 <planeGeometry args={[0.5, 60]} />
-                <meshLambertMaterial color={0x9e6930} />
+                <meshPhongMaterial color={0x9e6930} shininess={8} />
             </mesh>
             {/* Horizontal crosspath */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 5]} receiveShadow>
                 <planeGeometry args={[40, 4]} />
-                <meshLambertMaterial color={0xb87333} />
+                <meshPhongMaterial color={0xb87333} shininess={12} specular={0x3a2010} />
             </mesh>
             {/* Stepping stones on path */}
             {[-18, -12, -6, 0, 6, 12, 18].map((z, i) => (
@@ -500,6 +501,7 @@ export function World() {
             <Well />
             <Orchard />
             <Rocks />
+            <Lanterns />
         </group>
     )
 }
