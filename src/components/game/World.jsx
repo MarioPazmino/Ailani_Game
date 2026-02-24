@@ -4,6 +4,7 @@ import { gameState } from './gameState'
 import { FarmhouseInterior } from './FarmhouseInterior'
 import { BarnInterior } from './BarnInterior'
 import { Lanterns } from './Lanterns'
+import { MathPortal } from '../mathWorld/MathPortal'
 
 /* ====== SUBCOMPONENTS ====== */
 
@@ -502,6 +503,7 @@ export function World() {
             <Orchard />
             <Rocks />
             <Lanterns />
+            <MathPortal />
         </group>
     )
 }

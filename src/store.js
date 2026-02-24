@@ -46,6 +46,8 @@ export const useGameStore = create((set, get) => ({
     screen: 'start',
     startGame: () => set({ screen: 'game' }),
     goBack: () => set({ screen: 'start', stars: 0, points: 0 }),
+    enterMathWorld: () => set({ screen: 'mathWorld' }),
+    leaveMathWorld: () => set({ screen: 'game' }),
 
     stars: 0,
     points: 0,
