@@ -22,6 +22,7 @@ function generateProblem() {
 
 const MAX_WRONG = 7   // head, body, L-arm, R-arm, L-leg, R-leg, face
 const WIN_TARGET = 10
+const TIMER_SECONDS = 30
 
 const HANGMAN_PARTS = [
     'head', 'body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'face',
@@ -142,7 +143,9 @@ export default function MathWorld() {
     const [messageType, setMessageType] = useState('') // 'correct' | 'wrong'
     const [gameOver, setGameOver] = useState(false) // 'win' | 'lose' | false
     const [showConfetti, setShowConfetti] = useState(false)
+    const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS)
     const msgTimeout = useRef(null)
+    const timerRef = useRef(null)
 
     const showMsg = useCallback((text, type, duration = 1500) => {
         setMessage(text)
@@ -151,10 +154,15 @@ export default function MathWorld() {
         msgTimeout.current = setTimeout(() => setMessage(''), duration)
     }, [])
 
+    const resetTimer = useCallback(() => {
+        setTimeLeft(TIMER_SECONDS)
+    }, [])
+
     const nextProblem = useCallback(() => {
         setProblem(generateProblem())
         setInput('')
-    }, [])
+        resetTimer()
+    }, [resetTimer])
 
     const handleNumber = useCallback((n) => {
         if (gameOver) return
@@ -183,6 +191,7 @@ export default function MathWorld() {
                 setShowConfetti(true)
                 return
             }
+            resetTimer()
             setTimeout(nextProblem, 800)
         } else {
             const newWrong = wrongCount + 1
@@ -195,8 +204,36 @@ export default function MathWorld() {
                 return
             }
             setInput('')
+            resetTimer()
         }
-    }, [gameOver, input, problem, correctCount, wrongCount, showMsg, nextProblem])
+    }, [gameOver, input, problem, correctCount, wrongCount, showMsg, nextProblem, resetTimer])
+
+    /* timeout handler — se pierde una parte del ahorcado */
+    const handleTimeout = useCallback(() => {
+        const newWrong = wrongCount + 1
+        setWrongCount(newWrong)
+        showMsg('⏰ ¡Se acabó el tiempo!', 'wrong')
+
+        if (newWrong >= MAX_WRONG) {
+            setGameOver('lose')
+            showMsg(`La respuesta era ${problem.answer}`, 'wrong', 5000)
+            return
+        }
+        setInput('')
+        resetTimer()
+        setProblem(generateProblem())
+    }, [wrongCount, problem, showMsg, resetTimer])
+
+    /* countdown timer */
+    useEffect(() => {
+        if (gameOver) return
+        if (timeLeft <= 0) {
+            handleTimeout()
+            return
+        }
+        timerRef.current = setTimeout(() => setTimeLeft(t => t - 1), 1000)
+        return () => clearTimeout(timerRef.current)
+    }, [timeLeft, gameOver, handleTimeout])
 
     const restart = useCallback(() => {
         setWrongCount(0)
@@ -204,8 +241,9 @@ export default function MathWorld() {
         setGameOver(false)
         setShowConfetti(false)
         setMessage('')
+        resetTimer()
         nextProblem()
-    }, [nextProblem])
+    }, [nextProblem, resetTimer])
 
     /* keyboard support */
     useEffect(() => {
@@ -246,6 +284,11 @@ export default function MathWorld() {
                     <span className="math-wrong-count">
                         ❌ {wrongCount}/{MAX_WRONG}
                     </span>
+                    {!gameOver && (
+                        <span className={`math-timer ${timeLeft <= 10 ? 'math-timer-danger' : timeLeft <= 20 ? 'math-timer-warning' : ''}`}>
+                            ⏱ {timeLeft}s
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -278,6 +321,14 @@ export default function MathWorld() {
                 <div className="math-problem-area">
                     {!gameOver ? (
                         <>
+                            {/* timer bar visual */}
+                            <div className="math-timer-bar-container">
+                                <div className="math-timer-bar" style={{ width: `${(timeLeft / TIMER_SECONDS) * 100}%` }}
+                                    data-danger={timeLeft <= 10 ? '' : undefined}
+                                    data-warning={timeLeft > 10 && timeLeft <= 20 ? '' : undefined}
+                                />
+                            </div>
+
                             <div className="math-problem-card">
                                 <div className="math-problem-text">
                                     <span className="math-num">{problem.a}</span>
